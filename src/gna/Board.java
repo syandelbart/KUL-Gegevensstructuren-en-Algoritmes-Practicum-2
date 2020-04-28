@@ -28,23 +28,10 @@ public class Board
 	// return number of blocks out of place
 	public int hamming()
 	{
-		//copy tiles & board
-		Board hamming_board = new Board(this.tiles);
-		
-		//getting zero tile to bottom
-		while((int) (hamming_board.getValuePosition(0) / this.tiles.length) != this.tiles.length-1) {
-			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + this.tiles.length);
-		}
-		
-		//getting zero tile to right
-		while(hamming_board.getValuePosition(0) != Math.pow(this.tiles.length, 2) - 1) {
-			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + 1);
-		}
-		
 		//only returns blocks out of place, distance is calculated in Solver
 		int out_of_place = 0;
 		for(int counter = 0;counter < Math.pow(this.tiles.length, 2);counter++) {
-			if(hamming_board.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != counter+1 && hamming_board.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != 0) {
+			if(this.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != counter+1 && this.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != 0) {
 				out_of_place++;
 			}
 		}		
@@ -55,34 +42,41 @@ public class Board
 	// return sum of Manhattan distances between blocks and goal
 	public int manhattan()
 	{
-		//copy tiles & board
-		Board hamming_board = new Board(this.tiles);
 		
-		//getting zero tile to bottom
-		while((int) (hamming_board.getValuePosition(0) / this.tiles.length) != this.tiles.length-1) {
-			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + this.tiles.length);
-		}
-		
-		//getting zero tile to right
-		while(hamming_board.getValuePosition(0) != Math.pow(this.tiles.length, 2) - 1) {
-			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + 1);
-		}
-		
-		System.out.print(hamming_board.toString());
-		
+		int expected_value = 1;
 		int total_wrong_distance = 0;
-		for(int counter = 0;counter < Math.pow(this.tiles.length, 2);counter++) {
-			int expected = counter+1;
-			int actual = hamming_board.getPositionValue(counter);
-			if(actual != expected && hamming_board.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != 0) {
-				int actual_value_on_spot = hamming_board.getPositionValue(counter);
+		int actual_index;
+		int actual_value;
+		int expected_index;
+		for(actual_index = 0;actual_index < Math.pow(this.tiles.length, 2)-1;actual_index++) {
+			actual_value = this.getPositionValue(actual_index);
+			expected_index = this.getValuePosition(expected_value);
+			if(actual_value == 0) {
+
+			} else if(actual_value == expected_value) {
+				expected_value++;
+
+			} else if(actual_value != expected_value) {
+				int expected_index_y = (int) (expected_index / this.tiles.length);
+				int expected_index_x = expected_index % this.tiles.length;
+				int actual_index_y = (int) (actual_index / this.tiles.length);
+				int actual_index_x = actual_index % this.tiles.length;
 				
-				int index_of_expected_value = hamming_board.getValuePosition((counter+1));
-				//actual index is counter
-				total_wrong_distance += Math.abs((int) (index_of_expected_value / this.tiles.length) - (int) (counter / this.tiles.length));
-				total_wrong_distance += Math.abs((index_of_expected_value % this.tiles.length) - (counter % this.tiles.length));
+				total_wrong_distance += Math.abs(expected_index_y - actual_index_y) + Math.abs(expected_index_x - actual_index_x);
 			}
+			
 		}
+		expected_value = 0;
+		actual_value = this.getPositionValue(actual_index);
+		if(actual_value != 0) {
+			expected_index = this.getValuePosition(expected_value);
+			int expected_index_y = (int) (expected_index / this.tiles.length);
+			int expected_index_x = expected_index % this.tiles.length;
+			int actual_index_y = (int) (actual_index / this.tiles.length);
+			int actual_index_x = actual_index % this.tiles.length;
+			total_wrong_distance += Math.abs(expected_index_y - actual_index_y) + Math.abs(expected_index_x - actual_index_x);
+		}
+		
 		return total_wrong_distance;
 	}
 	
@@ -153,7 +147,7 @@ public class Board
 	{
 		String result = new String();
 		for(int index=0;index<Math.pow(this.tiles.length, 2);index++) {
-			if(index % 3 == 0) {
+			if(index % this.tiles.length == 0) {
 				result += "\n";
 			}
 			result += this.getPositionValue(index) + " ";
@@ -165,41 +159,31 @@ public class Board
 	// first be moved to its correct position.
 	public boolean isSolvable()
 	{
-		//copy tiles & board
-		Board hamming_board = new Board(this.tiles);
-		
-		//getting zero tile to bottom
-		while((int) (hamming_board.getValuePosition(0) / this.tiles.length) != this.tiles.length-1) {
-			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + this.tiles.length);
-		}
-		
-		//getting zero tile to right
-		while(hamming_board.getValuePosition(0) != Math.pow(this.tiles.length, 2) - 1) {
-			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + 1);
-		}
-		
-		
-		int sumupperfraction = 0;
-		int sumlowerfraction = 0;
-		for(int j=0;j < Math.pow(this.tiles.length, 2);j++) {
-			for(int i=0;i < j;i++) {
-				sumupperfraction += (hamming_board.getValuePosition(j) - hamming_board.getValuePosition(i));
-				sumlowerfraction += (j - i);
+		int inversions = 0;
+		for(int c1 = 0;c1 < Math.pow(this.tiles.length, 2)-1;c1++) {
+			for(int c2 = c1+1;c2 < Math.pow(this.tiles.length, 2);c2++) {
+				if(this.getPositionValue(c2) > 0 && this.getPositionValue(c1) > 0 && this.getPositionValue(c1) > this.getPositionValue(c2)) {
+					inversions++;
+				}
 			}
 		}
 		
-		return sumupperfraction/sumlowerfraction > 0;
-		
-	}
-	
-	public int[][] getCheckableState() {
-		return null;
-//
+		//if grid has odd N in both directions
+		//reference https://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/
+		if(this.tiles.length % 2 == 1) {
+			return inversions % 2 == 0;
+		} else {
+			if(this.getValuePosition(0) % 2 == 1) {
+				return inversions % 2 == 0;
+			} else {
+				return inversions % 2 == 1;
+			}
+		}
 	}
 	
 	private int getValuePosition(int value) {
 		int counter = 0;
-		while(value != this.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length]) {
+		while(value != this.getPositionValue(counter)) {
 			counter++;
 		}
 		return counter;

@@ -46,7 +46,6 @@ public class Solver
 					next_in_tree.setPrev(cursor);
 					if (priority == PriorityFunc.HAMMING) {
 						next_in_tree.setCost(next_in_tree.getBoard().hamming() + moves);
-						System.out.println("Cost: " + next_in_tree.getCost());
 					} else if(priority == PriorityFunc.MANHATTAN) {
 						next_in_tree.setCost(next_in_tree.getBoard().manhattan() + moves);
 					} else {
@@ -57,7 +56,6 @@ public class Solver
 			}
 			cursor = priority_queue.poll();
 			moves += 1;
-			System.out.println("----------------" + moves + "----------");
 		}
 		setSolution(cursor);
 	}
