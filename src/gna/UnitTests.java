@@ -20,10 +20,12 @@ public class UnitTests {
   public void testNeighbours() {
 	  	int[][] testTiles1 = new int[][] { {8,1,3},{4,0,2},{7,6,5} };
 		Board testBoard1 = new Board(testTiles1);
+		
+	  	int[][] testTiles2 = new int[][] { {0,1,3},{4,2,5},{7,8,6} };
+		Board testBoard2 = new Board(testTiles2);
+		
+		
 		Collection<Board> neighbours = testBoard1.neighbors();
-		System.out.print(testBoard1.toString());
-		System.out.println("Hamming: " + testBoard1.hamming());
-		System.out.println("Manhattan: " + testBoard1.manhattan());
 		Iterator<Board> neighbiter = neighbours.iterator();
 		//System.out.println("--------------");
 		//while(neighbiter.hasNext()) {
@@ -32,9 +34,10 @@ public class UnitTests {
 		//}
 		
 		//testing working of board
-		List<Board> solution = new Solver(testBoard1,PriorityFunc.HAMMING).solution();
-		for(int i = 0;i < solution.size();i++) {
-			System.out.print(solution.get(i).toString());
+		Solver solution = new Solver(testBoard2,PriorityFunc.HAMMING);
+		System.out.println("finished");
+		for(int i = 0;i < solution.solution().size();i++) {
+			System.out.print(solution.solution().get(i).toString());
 		}
 		
   }

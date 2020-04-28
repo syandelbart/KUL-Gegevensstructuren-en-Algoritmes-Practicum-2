@@ -10,15 +10,15 @@ public class State {
 	
 	//getters
 	public Board getBoard() {
-		return stateBoard;
+		return this.stateBoard;
 	}
 	
 	public State prev() {
-		return prev_state;
+		return this.prev_state;
 	}
 	
 	public State next() {
-		return next_state;
+		return this.next_state;
 	}
 	
 	public void setPrev(State prev_state) {

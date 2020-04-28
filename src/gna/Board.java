@@ -75,18 +75,12 @@ public class Board
 			int expected = counter+1;
 			int actual = hamming_board.getPositionValue(counter);
 			if(actual != expected && hamming_board.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != 0) {
-				System.out.println("Counter: " + counter);
 				int actual_value_on_spot = hamming_board.getPositionValue(counter);
-				System.out.println("AVOS: " + actual_value_on_spot);
-				System.out.println("Expect: " + (counter+1));
-				
 				
 				int index_of_expected_value = hamming_board.getValuePosition((counter+1));
 				//actual index is counter
 				total_wrong_distance += Math.abs((int) (index_of_expected_value / this.tiles.length) - (int) (counter / this.tiles.length));
 				total_wrong_distance += Math.abs((index_of_expected_value % this.tiles.length) - (counter % this.tiles.length));
-				System.out.println("TotalMoves: " + (Math.abs((int) (index_of_expected_value / this.tiles.length) - (int) (counter / this.tiles.length)) + Math.abs((index_of_expected_value % this.tiles.length) - (counter % this.tiles.length))));
-				System.out.println("---------");
 			}
 		}
 		return total_wrong_distance;
@@ -134,7 +128,7 @@ public class Board
 			neighbours.add(cursor);
 		}
 		//x-right
-		if(zero_x + 1 >= this.tiles.length-1) {
+		if(zero_x + 1 <= this.tiles.length-1) {
 			cursor = this.Copy();
 			cursor.switchTiles(zero_position, zero_position + 1);
 			neighbours.add(cursor);
@@ -146,7 +140,7 @@ public class Board
 			neighbours.add(cursor);
 		}
 		//y-bot
-		if(zero_y + 1 >= 0) {
+		if(zero_y + 1 <= this.tiles.length-1) {
 			cursor = this.Copy();
 			cursor.switchTiles(zero_position, zero_position + this.tiles.length);
 			neighbours.add(cursor);
@@ -213,14 +207,11 @@ public class Board
 	
 	
 	public boolean isGoal() {
-		int counter = 1;
-		Boolean valid = true;
-		while(counter <= Math.pow(this.tiles.length,2) && valid) {
-			valid = (counter == this.tiles[(int) ((counter-1) / 3)][(counter-1) % 3]);
-		}
-		
-		if(valid) {
-			return this.tiles[tiles.length][tiles.length] == 0;
+		boolean valid = true;
+		int counter = 0;
+		while(valid && counter < Math.pow(this.tiles.length, 2)-1) {
+			valid = (this.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] == (counter+1));
+			counter++;
 		}
 		return valid;
 		
