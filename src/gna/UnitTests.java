@@ -31,5 +31,11 @@ public class UnitTests {
 			//System.out.println("--------------");
 		//}
 		
+		//testing working of board
+		List<Board> solution = new Solver(testBoard1,PriorityFunc.HAMMING).solution();
+		for(int i = 0;i < solution.size();i++) {
+			System.out.print(solution.get(i).toString());
+		}
+		
   }
 }

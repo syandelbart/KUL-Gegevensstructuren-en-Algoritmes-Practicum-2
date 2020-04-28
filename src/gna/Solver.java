@@ -12,7 +12,6 @@ import libpract.PriorityFunc;
 
 public class Solver
 {
-	PriorityQueue<State> priority_queue = new PriorityQueue<State>();
 	Set<Board> visited_boards = new HashSet<Board>();
 	State initial_state;
 	State first_state_solution = null;
@@ -25,6 +24,8 @@ public class Solver
 	 */
 	public Solver(Board initial, PriorityFunc priority)
 	{
+		StateComparator stateComparison = new StateComparator();
+		PriorityQueue<State> priority_queue = new PriorityQueue<State>(5,stateComparison);
 		this.initial_state = new State(initial);
 		this.initial_state.setCost(0);
 		
@@ -57,6 +58,7 @@ public class Solver
 			cursor = priority_queue.poll();
 			moves += 1;
 		}
+		
 	}
 	
 
