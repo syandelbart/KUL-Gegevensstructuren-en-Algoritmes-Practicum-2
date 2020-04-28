@@ -1,6 +1,7 @@
 package gna;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Board
@@ -10,20 +11,89 @@ public class Board
 	// construct a board from an N-by-N array of tiles
 	public Board( int[][] tiles )
 	{
+		int[][] copytiles = new int[tiles.length][tiles[0].length];
+		for(int y = 0;y < tiles.length;y++) {
+			for(int x = 0;x < tiles[0].length;x++) {
+				copytiles[y][x] = tiles[y][x];
+			}
+		}
+		this.tiles = copytiles;
+		
+		
+		
 		// TODO (make a deep copy of tiles and store it into this.tiles)
-		throw new RuntimeException("not implemented");
+		//throw new RuntimeException("not implemented");
 	}
 	
 	// return number of blocks out of place
 	public int hamming()
 	{
-		throw new RuntimeException("not implemented"); // TODO
+		//copy tiles & board
+		Board hamming_board = new Board(this.tiles);
+		
+		//getting zero tile to bottom
+		while((int) (hamming_board.getValuePosition(0) / this.tiles.length) != this.tiles.length-1) {
+			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + this.tiles.length);
+		}
+		
+		//getting zero tile to right
+		while(hamming_board.getValuePosition(0) != Math.pow(this.tiles.length, 2) - 1) {
+			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + 1);
+		}
+		
+		//only returns blocks out of place, distance is calculated in Solver
+		int out_of_place = 0;
+		for(int counter = 0;counter < Math.pow(this.tiles.length, 2);counter++) {
+			if(hamming_board.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != counter+1 && hamming_board.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != 0) {
+				out_of_place++;
+			}
+		}		
+		
+		return out_of_place;
 	}
 	
 	// return sum of Manhattan distances between blocks and goal
 	public int manhattan()
 	{
-		throw new RuntimeException("not implemented"); // TODO
+		//copy tiles & board
+		Board hamming_board = new Board(this.tiles);
+		
+		//getting zero tile to bottom
+		while((int) (hamming_board.getValuePosition(0) / this.tiles.length) != this.tiles.length-1) {
+			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + this.tiles.length);
+		}
+		
+		//getting zero tile to right
+		while(hamming_board.getValuePosition(0) != Math.pow(this.tiles.length, 2) - 1) {
+			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + 1);
+		}
+		
+		System.out.print(hamming_board.toString());
+		
+		int total_wrong_distance = 0;
+		for(int counter = 0;counter < Math.pow(this.tiles.length, 2);counter++) {
+			int expected = counter+1;
+			int actual = hamming_board.getPositionValue(counter);
+			if(actual != expected && hamming_board.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length] != 0) {
+				System.out.println("Counter: " + counter);
+				int actual_value_on_spot = hamming_board.getPositionValue(counter);
+				System.out.println("AVOS: " + actual_value_on_spot);
+				System.out.println("Expect: " + (counter+1));
+				
+				
+				int index_of_expected_value = hamming_board.getValuePosition((counter+1));
+				//actual index is counter
+				total_wrong_distance += Math.abs((int) (index_of_expected_value / this.tiles.length) - (int) (counter / this.tiles.length));
+				total_wrong_distance += Math.abs((index_of_expected_value % this.tiles.length) - (counter % this.tiles.length));
+				System.out.println("TotalMoves: " + (Math.abs((int) (index_of_expected_value / this.tiles.length) - (int) (counter / this.tiles.length)) + Math.abs((index_of_expected_value % this.tiles.length) - (counter % this.tiles.length))));
+				System.out.println("---------");
+			}
+		}
+		return total_wrong_distance;
+	}
+	
+	public Board Copy() {
+		return new Board(this.tiles.clone());
 	}
 	
 	// Does this board equal y. Two boards are equal when they both were constructed
@@ -51,20 +121,112 @@ public class Board
 	// return a Collection of all neighboring board positions
 	public Collection<Board> neighbors()
 	{
-		throw new RuntimeException("not implemented"); // TODO
+		Collection<Board> neighbours = new ArrayList<Board>();
+		int zero_position = this.getValuePosition(0);
+		int zero_x = zero_position % this.tiles.length;
+		int zero_y = (int) (zero_position / this.tiles.length);
+		Board cursor = null;
+		//check neighbours individually
+		//x-left
+		if(zero_x - 1 >= 0) {
+			cursor = this.Copy();
+			cursor.switchTiles(zero_position, zero_position - 1);
+			neighbours.add(cursor);
+		}
+		//x-right
+		if(zero_x + 1 >= this.tiles.length-1) {
+			cursor = this.Copy();
+			cursor.switchTiles(zero_position, zero_position + 1);
+			neighbours.add(cursor);
+		}
+		//y-top
+		if(zero_y - 1 >= 0) {
+			cursor = this.Copy();
+			cursor.switchTiles(zero_position, zero_position - this.tiles.length);
+			neighbours.add(cursor);
+		}
+		//y-bot
+		if(zero_y + 1 >= 0) {
+			cursor = this.Copy();
+			cursor.switchTiles(zero_position, zero_position + this.tiles.length);
+			neighbours.add(cursor);
+		}	
+		return neighbours;
 	}
 	
 	// return a string representation of the board
 	public String toString()
 	{
-		return "<empty>"; // TODO
+		String result = new String();
+		for(int index=0;index<Math.pow(this.tiles.length, 2);index++) {
+			if(index % 3 == 0) {
+				result += "\n";
+			}
+			result += this.getPositionValue(index) + " ";
+		}
+		return result + "\n"; // TODO
 	}
 
 	// is the initial board solvable? Note that the empty tile must
 	// first be moved to its correct position.
 	public boolean isSolvable()
 	{
-		throw new RuntimeException("not implemented"); // TODO
+		int sumupperfraction = 0;
+		int sumlowerfraction = 0;
+		for(int j=0;j < Math.pow(this.tiles.length, 2);j++) {
+			for(int i=0;i < j;i++) {
+				sumupperfraction += (this.getValuePosition(j) - this.getValuePosition(i));
+				sumlowerfraction += (j - i);
+			}
+		}
+		
+		return sumupperfraction/sumlowerfraction > 0;
+		
 	}
+	
+	public int[][] getCheckableState() {
+		return null;
+//
+	}
+	
+	private int getValuePosition(int value) {
+		int counter = 0;
+		while(value != this.tiles[(int) (counter / this.tiles.length)][counter % this.tiles.length]) {
+			counter++;
+		}
+		return counter;
+	}
+	
+	private void switchTiles(int index1,int index2) {
+		int index1value = this.getPositionValue(index1);
+		this.setValue(index1, this.getPositionValue(index2));;
+		this.setValue(index2, index1value);
+	}
+	
+	private int getPositionValue(int index) {
+		return this.tiles[(int) (index / this.tiles.length)][index % this.tiles.length];
+	}
+	
+	private void setValue(int index,int value) {
+		this.tiles[(int) (index / this.tiles.length)][index % this.tiles.length] = value;
+	}
+	
+	
+	public boolean isGoal() {
+		int counter = 1;
+		Boolean valid = true;
+		while(counter <= Math.pow(this.tiles.length,2) && valid) {
+			valid = (counter == this.tiles[(int) ((counter-1) / 3)][(counter-1) % 3]);
+		}
+		
+		if(valid) {
+			return this.tiles[tiles.length][tiles.length] == 0;
+		}
+		return valid;
+		
+	}
+	
+	
+	
 }
 
