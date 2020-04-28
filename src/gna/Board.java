@@ -158,18 +158,32 @@ public class Board
 			}
 			result += this.getPositionValue(index) + " ";
 		}
-		return result + "\n"; // TODO
+		return result + "\n";
 	}
 
 	// is the initial board solvable? Note that the empty tile must
 	// first be moved to its correct position.
 	public boolean isSolvable()
 	{
+		//copy tiles & board
+		Board hamming_board = new Board(this.tiles);
+		
+		//getting zero tile to bottom
+		while((int) (hamming_board.getValuePosition(0) / this.tiles.length) != this.tiles.length-1) {
+			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + this.tiles.length);
+		}
+		
+		//getting zero tile to right
+		while(hamming_board.getValuePosition(0) != Math.pow(this.tiles.length, 2) - 1) {
+			hamming_board.switchTiles(hamming_board.getValuePosition(0), hamming_board.getValuePosition(0) + 1);
+		}
+		
+		
 		int sumupperfraction = 0;
 		int sumlowerfraction = 0;
 		for(int j=0;j < Math.pow(this.tiles.length, 2);j++) {
 			for(int i=0;i < j;i++) {
-				sumupperfraction += (this.getValuePosition(j) - this.getValuePosition(i));
+				sumupperfraction += (hamming_board.getValuePosition(j) - hamming_board.getValuePosition(i));
 				sumlowerfraction += (j - i);
 			}
 		}
