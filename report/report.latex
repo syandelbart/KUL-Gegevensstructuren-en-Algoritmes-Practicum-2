@@ -1,0 +1,104 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.54cm]{geometry}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{wrapfig}
+
+
+\setlength\parindent{0em}
+
+\begin{document}
+
+\title{Verslag Practicum 2\\ 
+\vspace{.3cm}\large{Gegevensstructuren en Algoritmen}}
+\author{Syan Delbart}
+\date{30 April 2020}
+
+
+\maketitle
+\thispagestyle{empty}
+ \newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Tabel}
+Hieronder de tabel dat een vergelijking tussen Hamming en Manhattan weergeeft. Het teken "?" betekent dat de uitvoeringstijd langer dan 5 minuten duurde of dat de heap zijn maximale grootte bereikt heeft (1024MB).
+
+    \begin{center}
+        \begin{tabular}{  c  c  c  c } 
+            Puzzel & Aantal verplaatsingen & Hamming (s) & Manhattan (s) \\ 
+            \hline
+            puzzle28.txt & 28 & 0.7623149 & 0.0301938 \\ 
+            puzzle30.txt & 30 & 1.3715011 & 0.0418339 \\ 
+            puzzle32.txt & 32 & ? & 0.7228698 \\ 
+            puzzle34.txt & 34 & ? & 0.2508192\\  
+            puzzle36.txt & 36 & ? & 1.9682707\\ 
+            puzzle38.txt & 38 & ? & 1.4757467\\ 
+            puzzle40.txt & 40 & ? & 0.4877991\\ 
+            puzzle42.txt & 42 & ? & 1.3360228\\ 
+        \end{tabular}
+    \end{center}
+
+\section{Complexiteit Hamming & Manhattan}
+    \subsection{Hamming}
+    De complexiteit van Hamming (in array accesses) is  $\sim N^2$. Hier zien we N als de lengte van een rij of kolom. Het is de bedoeling dat voor elk element wordt gecontroleerd of die op de juiste plek staat.
+    
+    \subsection{Manhattan}
+    De complexiteit van Manhattan (in array accesses) is ook $\sim N^2$. De N stelt ook hier de lengte van een rij of kolom voor. Bij deze prioriteitsfunctie wordt voor elk element uit de puzzel de afstand tussen de actuele positie en de doelindex van het element bepaald.
+
+\section{Implementatie van isSolvable}
+    \subsection{De implementatie}
+    Voor te bepalen of een bord oplosbaar is worden het aantal inversies geteld. Inversies zijn situaties waar een getal (bijv. 8) voor een getal staat dat kleiner is dan zichzelf (bijv. 7). Elke index van de puzzel zal vergeleken worden met alle indexen dat erna komen. Aangezien er wordt uitgegaan van een N*N bord - waarbij N een variabele grootte - kan dit bord zowel een even als een oneven aantal cijfers in één richting hebben. Stel dat de puzzel een oneven grootte heeft, zal de puzzel oplosbaar zijn als het aantal inversies even is. Als dat niet zo is, zal het afhangen van de positie van het lege vakje (0).
+    
+    \subsection{Complexiteit isSolvable}
+    Het vergelijkt elke index met al de indexen dat erna komen. Dit betekent dus dat het aantal elementen waarmee zal vergeleken worden telkens met 1 verminderd. Indien de waarde op de eerste of tweede index 0 is, zal de vergelijking niet worden uitgevoerd. Hierdoor moet er geen lijst worden aangemaakt worden waar de lege tegel uitgefilterd wordt.  De eerste lus zal in totaliteit op $(N^2-1)$ aantal elementen worden uitgevoerd, aangezien er achter laatste positie $(N^2)$ geen elementen ligt waarmee vergeleken kan worden.
+    \newline\newline
+    Het aantal elementen waarmee vergeleken zal worden is respectievelijk $(N^2-1) + (N^2-2) + ... + 2 + 1$ naarmate de index dat vergelijkt verhoogd word.
+    \newline\newline
+    Voor elke loop zal er voor de eerste lus telkens 1 maal een array access gebeuren, waarbij de rest van die array accesses in de 2de lus zal gebeuren. 
+    
+   \begin{equation} \label{eq1}
+        \begin{split}
+        complexiteit & = (N^2 - 1) * \frac{(N^2+1)}{2} \\
+        & = \frac{N^4 + N^2 - N^2 + 1}{2} \\
+        & \sim \frac{1}{2}N^4
+        \end{split}
+    \end{equation}
+    
+    \subsection{Complexiteit hulpfuncties}
+        \subsubsection{getPositionValue}
+        Deze methode maakt het eenvoudiger om de waarde op een bepaalde index (0 t.e.m. $N^2-1$) te verkrijgen. De complexiteit hiervan is $\sim 1 $ aangezien arrays in constante tijd worden geaccessed.
+        
+\section{Hoeveelheid bordposities worst-case}
+In theorie is het maximaal aantal bordposities die in het geheugen kunnen zitten $(N^2)!/2$. De deling door 2 komt door het feit dat niet elke positie een geldige bordpositie voorstelt.
+
+\section{Prioriteitsrij worst-case tijdscomplexiteit}
+    \subsubsection{add()}
+    Deze functie heeft als worst-case cost $log n$, waarbij n het aantal elementen dat toegevoegd moet worden. In dit geval is dat aantal het worst-case aantal opgeslagen bordposities.
+   \begin{equation} \label{eq1}
+        \begin{split}
+        complexiteit & = log(\frac{(N^2)!}{2}) \\
+        & = log((N^2)!) - log(2)\\
+        & = N^2log(N^2) - N^2 - log(2) \\
+        & = 2N^2log(N) - N^2 - log(2) \\
+        & \sim 2N^2log(N)
+        \end{split}
+    \end{equation}
+
+\section{Betere prioriteitsfuncties}
+Binnen het A* algoritme heb ik er nog één gevonden dat een mogelijke verbetering van de snelheid kan brengen. Deze prioriteitsfunctie is een aanpassing van de Manhattan prioriteitsfunctie. Bij Manhattan wordt de afstand tussen een tegel en zijn doelpositie berekent in zowel verticale als horizontale afstand. De kost om die verplaatsing te doen houdt geen rekening met de verplaatsing die de tegels daartussen moeten doen. Stel dat de Manhattan afstand 4 is, betekent dit dus dat er 3 tegels zullen moeten verplaatsen om deze tegel "ruimte" te geven. Deze tegels dat moeten verplaatsen kunnen we dan op een eenvoudige wijze bij de al vastgelegde manhattan afstand optellen. $Optimalisatie = M + (M-1) => 2M-1$. Na de berekening van manhattan is het dus de bedoeling om dat resultaat te vermenigvuldigen met 2 en min 1 te doen. In deze context betekent beter een verandering in uitvoeringstijd. Het zal geen optimale oplossing geven aangezien de kost in zekere zin "overschat" word, wat komt omdat die voor elke tegel extra bewegingen zal tellen, ookal zal volgens de standaard manhattan prioriteitsfunctie elke tegel zich al op de juiste plek bevinden. Het is alsnog interessant om deze aangepaste versie van manhattan aan te kaarten aangezien deze een tijdsverbetering van x10 kent op een aantal puzzels.
+
+\section{Voorkeur bij willekeurige 4x4/5x5 puzzels}
+De voorkeur gaat absoluut uit naar een betere prioriteitsfunctie. Aan de resultaten in de tabel vooraan dit verslag is duidelijk te zien dat hamming minder goed presteert dan manhattan. Aangezien tijd en geheugen hand in hand gaan is het gebruiken van een betere prioriteitsfunctie dus het meest belangrijke.
+
+\section{Efficiënt algoritme voor grote puzzels}
+Wat efficiëntie betreft is het A* algoritme zeer efficiënt, vooral met Manhattan. Ik heb het algoritme vergeleken met een aantal algoritmes zoals DFS, BFS en Uniform Cost. Al de algoritmes dat ik gevonden heb waren of te wel trager, of te wel een minder uitgebreide versie van het A* algoritme. Met andere woorden, ik denk niet dat er een efficiënter algoritme is dan het A* algoritme. 
+
+    
+\end{document}
